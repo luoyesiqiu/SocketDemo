@@ -32,7 +32,7 @@ public class MyServer {
                     msgBody[i]=(byte)data;
                 }
             }
-            log("消息内容:"+new String(msgBody));
+            log("来自客户端的消息:"+new String(msgBody));
         }
     }
 
