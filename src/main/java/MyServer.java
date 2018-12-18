@@ -1,6 +1,8 @@
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 public class MyServer {
 
@@ -10,11 +12,11 @@ public class MyServer {
         ServerSocket serverSocket=new ServerSocket(6523);
         Socket socket=serverSocket.accept();
         InputStream inputStream=socket.getInputStream();
-        while (true) {
+        while (!socket.isClosed()) {
             int version = inputStream.read();
             if (version != Protocol.VERSION) {
                 log("不正确的协议版本");
-                return;
+                continue;
             }
             for (int i = 0; i < Protocol.FLAG_LEN; i++) {
                 if (inputStream.read() != Protocol.FLAG) {
@@ -24,14 +26,8 @@ public class MyServer {
             }
             int msgLength = inputStream.read();
             byte[] msgBody=new byte[msgLength];
-            for (int i = 0; i < msgLength; i++) {
-                int data = inputStream.read();
-                if (data == -1) {
-                    log("读取过早结束！");
-                } else {
-                    msgBody[i]=(byte)data;
-                }
-            }
+            int data = inputStream.read(msgBody);
+
             log("来自客户端的消息:"+new String(msgBody));
         }
     }
