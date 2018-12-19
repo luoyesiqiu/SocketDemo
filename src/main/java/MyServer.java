@@ -1,5 +1,7 @@
 import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
@@ -8,27 +10,27 @@ public class MyServer {
 
     private  final  static String TAG="[server]";
     public static void main(String[] args) throws Exception {
-
         ServerSocket serverSocket=new ServerSocket(6523);
         Socket socket=serverSocket.accept();
         InputStream inputStream=socket.getInputStream();
-        while (!socket.isClosed()) {
-            int version = inputStream.read();
-            if (version != Protocol.VERSION) {
-                log("不正确的协议版本");
-                continue;
-            }
-            for (int i = 0; i < Protocol.FLAG_LEN; i++) {
-                if (inputStream.read() != Protocol.FLAG) {
-                    log("消息格式错误");
-                    return;
-                }
-            }
-            int msgLength = inputStream.read();
-            byte[] msgBody=new byte[msgLength];
-            int data = inputStream.read(msgBody);
 
-            log("来自客户端的消息:"+new String(msgBody));
+        while(true) {
+            int len=0;
+            byte[] header=new byte[3];
+            for (int i = 0; i < 3; i++) {
+                header[i] = (byte) inputStream.read();
+            }
+            if (header[0] == Protocol.FLAG[0]
+                    && header[1] == Protocol.FLAG[1]
+                    && header[2] == Protocol.FLAG[2]) {
+                System.out.println(TAG+"检测到消息头！");
+
+                len+=((byte)inputStream.read());
+                len+=(((byte)inputStream.read())<<8);
+                len+=(((byte)inputStream.read())<<16);
+                len+=(((byte)inputStream.read())<<24);
+                System.out.println(TAG+"消息长度:"+len);
+            }
         }
     }
 

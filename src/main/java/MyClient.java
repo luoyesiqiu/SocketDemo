@@ -1,8 +1,6 @@
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class MyClient {
@@ -14,27 +12,29 @@ public class MyClient {
 
         Socket socket=new Socket("localhost",6523);
         OutputStream outputStream=socket.getOutputStream();
-        int idx=0;
-        while(idx++<1) {
-            int randomInt=new Random().nextInt(10000);
-            byte[] willSendData=genRandomString(randomInt);
-            log("写入消息体："+new String(willSendData));
-            log("写入协议版本：" + Protocol.VERSION);
-            outputStream.write(Protocol.VERSION);
-            log("写入" + Protocol.FLAG_LEN + "个标记符");
-            for (int i = 0; i < Protocol.FLAG_LEN; i++) {
-                outputStream.write(Protocol.FLAG);
-            }
-            log("写入消息体长度：" + willSendData.length);
-            outputStream.write(willSendData.length);
-            for(int i=0;i<willSendData.length;i++) {
-                outputStream.write(willSendData[i]);
+        Random rd=new Random();
+        while(true) {
+            outputStream.write(Protocol.FLAG[0]);
+            outputStream.write(Protocol.FLAG[1]);
+            outputStream.write(Protocol.FLAG[2]);
+            int n=rd.nextInt(100);
+            int len=n*255;
 
+            byte[] len_parts=new byte[4];
+            len_parts[0]=(byte)(len&0xff);
+            len_parts[1]=(byte)((len&0xff00)>>8);
+            len_parts[2]=(byte)((len&0xff0000)>>16);
+            len_parts[3]=(byte)((len&0xff000000)>>24);
+            outputStream.write(len_parts);
+            System.out.println(TAG+"消息长度："+len);
+            for(int i=0;i<n;i++){
+                for(int j=0;j<255;j++){
+                    outputStream.write((byte)j);
+                }
             }
-            outputStream.flush();
+
+
         }
-        outputStream.close();
-        socket.close();
     }
 
     private static byte[] genRandomString(int len){

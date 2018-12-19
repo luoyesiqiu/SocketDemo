@@ -1,5 +1,3 @@
 public class Protocol {
-    public static final int VERSION=0x1;
-    public static final  int FLAG=0xff;
-    public static final int FLAG_LEN=3;
+    public static final  byte[] FLAG={(byte)0xdd,(byte)0xd0,(byte)0xd1};
 }
