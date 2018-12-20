@@ -1,10 +1,6 @@
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.SocketChannel;
 
 public class MyServer {
 
@@ -13,7 +9,7 @@ public class MyServer {
         ServerSocket serverSocket=new ServerSocket(6523);
         Socket socket=serverSocket.accept();
         InputStream inputStream=socket.getInputStream();
-
+        int idx=1;
         while(true) {
             int len=0;
             byte[] header=new byte[3];
@@ -25,11 +21,15 @@ public class MyServer {
                     && header[2] == Protocol.FLAG[2]) {
                 System.out.println(TAG+"检测到消息头！");
 
-                len+=((byte)inputStream.read());
-                len+=(((byte)inputStream.read())<<8);
-                len+=(((byte)inputStream.read())<<16);
-                len+=(((byte)inputStream.read())<<24);
-                System.out.println(TAG+"消息长度:"+len);
+                len+=(((inputStream.read()&0xff)<<0));
+                len+=(((inputStream.read()&0xff)<<8));
+                len+=(((inputStream.read()&0xff)<<16));
+                len+=(((inputStream.read()&0xff)<<24));
+                System.out.println(TAG+"接收第"+(idx++)+"条消息，长度："+len);
+                for(int i=0;i<len;i++)
+                {
+                    inputStream.read();
+                }
             }
         }
     }

@@ -13,6 +13,9 @@ public class MyClient {
         Socket socket=new Socket("localhost",6523);
         OutputStream outputStream=socket.getOutputStream();
         Random rd=new Random();
+
+        System.out.println();
+        int idx=1;
         while(true) {
             outputStream.write(Protocol.FLAG[0]);
             outputStream.write(Protocol.FLAG[1]);
@@ -20,13 +23,13 @@ public class MyClient {
             int n=rd.nextInt(100);
             int len=n*255;
 
-            byte[] len_parts=new byte[4];
-            len_parts[0]=(byte)(len&0xff);
-            len_parts[1]=(byte)((len&0xff00)>>8);
-            len_parts[2]=(byte)((len&0xff0000)>>16);
-            len_parts[3]=(byte)((len&0xff000000)>>24);
-            outputStream.write(len_parts);
-            System.out.println(TAG+"消息长度："+len);
+            byte[] lenParts=new byte[4];
+            lenParts[0]=(byte)(len&0xff);
+            lenParts[1]=(byte)((len&0xff00)>>8);
+            lenParts[2]=(byte)((len&0xff0000)>>16);
+            lenParts[3]=(byte)((len&0xff000000)>>24);
+            outputStream.write(lenParts);
+            System.out.println(TAG+"发送第"+(idx++)+"条消息，长度："+len);
             for(int i=0;i<n;i++){
                 for(int j=0;j<255;j++){
                     outputStream.write((byte)j);
